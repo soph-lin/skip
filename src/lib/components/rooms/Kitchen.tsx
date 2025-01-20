@@ -2,7 +2,7 @@ import Room from "../Room";
 import { RoomInfo, RoomLayout } from "@/lib/utils/room";
 import Interactable from "../Interactable";
 
-export const KitchenComponent = () => (
+const KitchenComponent = () => (
   <Room
     key="kitchen"
     objects={[

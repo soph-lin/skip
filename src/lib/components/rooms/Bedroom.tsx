@@ -2,9 +2,9 @@ import Room from "../Room";
 import { RoomInfo, RoomLayout } from "@/lib/utils/room";
 import Interactable from "../Interactable";
 
-const BedroomComponent = () => <Room objects={[<Interactable key="book" />]} />;
-
-// const BedroomComponent = <Room children={[<Interactable key="book" />]} />
+const BedroomComponent = () => (
+  <Room objects={[<Interactable key="book" dialogueName="book" />]} />
+);
 
 export const BedroomLayout: RoomLayout = { right: "bedroom" };
 

@@ -3,12 +3,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "../utils/misc";
 
-import testDialogue from "@/lib/utils/dialogue/compiled/dialogue.ink.json";
+import startDialogue from "@/lib/utils/dialogue/compiled/start.ink.json";
 import DialogueManager from "../utils/dialogue/DialogueManager";
 
 export default function DialogueSystem() {
   const initialized = useRef(false);
-  const [dialogueManager] = useState(() => new DialogueManager(testDialogue));
+  const [dialogueManager, setDialogueManager] = useState(
+    () => new DialogueManager(startDialogue)
+  );
   const [currentLine, setCurrentLine] = useState<string | null>(null);
   const [typedLine, setTypedLine] = useState<string>("");
   const [choices, setChoices] = useState<{ index: number; text: string }[]>([]);
@@ -18,10 +20,32 @@ export default function DialogueSystem() {
   // Initialize dialogue
   useEffect(() => {
     if (!initialized.current) {
-      console.log("initialize");
       initialized.current = true;
     }
   }, []);
+
+  // Update dialogue
+  useEffect(() => {
+    const handleUpdateDialogue = async (e: MessageEvent<{ name: string }>) => {
+      const name = e.data.name;
+      const modulePath = `@/lib/utils/dialogue/compiled/${name}.ink.json`;
+      try {
+        const dialogueData = await import(modulePath);
+        const manager = new DialogueManager(dialogueData.default);
+        setDialogueManager(manager);
+      } catch (error) {
+        console.error(`Failed to load dialogue file: ${modulePath}`, error);
+      }
+    };
+    window.addEventListener(
+      "setDialogue",
+      handleUpdateDialogue as EventListener
+    );
+  }, []);
+
+  useEffect(() => {
+    advanceDialogue();
+  }, [dialogueManager]);
 
   // Process dialogue
   const advanceDialogue = () => {

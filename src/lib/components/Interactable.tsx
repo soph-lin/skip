@@ -11,27 +11,20 @@ export interface InteractableProps
   extends PixiReactElementProps<typeof Sprite> {
   key: string;
   textureSrc?: string;
-  dialogue?: string;
+  dialogueName?: string;
   onTouch?: () => void;
   onInteract?: () => void;
 }
 
-const defaultOnTouch = () => {
-  console.log("Player touched object!");
-};
-
-const defaultOnInteract = () => {
-  console.log("Player interacted with object!");
-};
-
 export default function Interactable({
+  dialogueName = "",
   textureSrc = "https://images.vexels.com/media/users/3/324278/isolated/preview/36957dab47f399e7db3b7c7129de6d20-book-icon-in-pink-color.png",
   x = 0,
   y = 0,
   width = 100,
   height = 100,
-  onTouch = defaultOnTouch,
-  onInteract = defaultOnInteract,
+  onTouch,
+  onInteract,
   ...spriteProps
 }: InteractableProps) {
   const objectRef = useRef<Sprite>(null);
@@ -39,17 +32,38 @@ export default function Interactable({
   const [texture] = useSuspenseAssets([textureSrc]);
   const [touchingPlayer, setTouchingPlayer] = useState(false);
 
+  const handleOnTouch = () => {
+    console.log("Player touched object!");
+    onTouch?.();
+  };
+
+  const handleOnInteract = () => {
+    console.log("Player interacted with object!");
+    if (dialogueName) handleSetDialogue();
+    onInteract?.();
+  };
+
   const handleCollision = (playerBounds: CollisionInfo) => {
     if (playerBounds && isColliding(playerBounds, myCollisionInfo)) {
-      onTouch?.();
+      handleOnTouch();
       setTouchingPlayer(true);
     } else {
       setTouchingPlayer(false);
     }
   };
 
+  const handleSetDialogue = () => {
+    const setDialogueEvent = new MessageEvent("setDialogue", {
+      data: { name: dialogueName },
+    });
+    window.dispatchEvent(setDialogueEvent);
+  };
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "z" && touchingPlayer) onInteract?.();
+    if (e.key === "z") {
+      console.log("touching player", touchingPlayer);
+      handleOnInteract();
+    }
   }, []);
 
   useEffect(() => {
