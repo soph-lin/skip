@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 import { extend, PixiReactElementProps, useSuspenseAssets } from "@pixi/react";
 import { Sprite } from "pixi.js";
@@ -48,9 +48,9 @@ export default function Interactable({
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "z" && touchingPlayer) onInteract?.();
-  };
+  }, []);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -60,9 +60,20 @@ export default function Interactable({
   }, [handleKeyDown]);
 
   useEffect(() => {
-    window.addEventListener("playerMove" as any, (e: MessageEvent) => {
+    const handlePlayerMove = (
+      e: MessageEvent<{ playerBounds: CollisionInfo }>
+    ) => {
       handleCollision(e.data.playerBounds);
-    });
+    };
+
+    window.addEventListener("playerMove", handlePlayerMove as EventListener);
+
+    return () => {
+      window.removeEventListener(
+        "playerMove",
+        handlePlayerMove as EventListener
+      );
+    };
   }, []);
 
   return (

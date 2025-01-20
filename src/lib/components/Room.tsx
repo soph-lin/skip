@@ -6,26 +6,26 @@ import { InteractableProps } from "./Interactable";
 extend({ Container });
 
 interface RoomProps {
-  children: React.ReactNode[];
+  objects: React.ReactNode[];
 }
 
-export default function Room({ children }: RoomProps) {
-  const childrenRefs = useRef<Sprite[]>([]);
+export default function Room({ objects }: RoomProps) {
+  const objectsRefs = useRef<(Sprite | null)[]>([]);
 
-  const enhancedChildren = children.map((child, index) => {
-    if (React.isValidElement<InteractableProps>(child)) {
-      return React.cloneElement(child, {
-        key: child.key || `object-${index}`,
+  const enhancedChildren = objects.map((object, index) => {
+    if (React.isValidElement<InteractableProps>(object)) {
+      return React.cloneElement(object, {
+        key: object.key || `object-${index}`,
         ref: (el: Sprite | null) => {
           if (el) {
-            childrenRefs.current[index] = el;
+            objectsRefs.current[index] = el;
           } else {
-            childrenRefs.current[index] = null as any;
+            objectsRefs.current[index] = null;
           }
         },
       } as InteractableProps);
     }
-    return child;
+    return object;
   });
 
   return <pixiContainer>{enhancedChildren}</pixiContainer>;

@@ -23,43 +23,6 @@ export default function DialogueSystem() {
     }
   }, []);
 
-  // Key bindings
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (event.key === " ") {
-      event.preventDefault();
-      advanceDialogue();
-    }
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleKeyDown]);
-
-  // Typewriter effect
-  const typeSpeed = 20; // in milliseconds
-  const typeOutText = (text: string) => {
-    if (typingInterval.current) {
-      clearInterval(typingInterval.current);
-    }
-
-    let currentIndex = 0;
-    setTypedLine("");
-
-    typingInterval.current = setInterval(() => {
-      if (currentIndex <= text.length) {
-        setTypedLine(text.slice(0, currentIndex));
-        currentIndex += 1;
-      } else {
-        if (typingInterval.current) {
-          clearInterval(typingInterval.current);
-        }
-      }
-    }, typeSpeed);
-  };
-
   // Process dialogue
   const advanceDialogue = () => {
     const line = dialogueManager.getNextLine();
@@ -97,6 +60,46 @@ export default function DialogueSystem() {
       }
     };
   }, []);
+
+  // Key bindings
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === " ") {
+        event.preventDefault();
+        advanceDialogue();
+      }
+    },
+    [advanceDialogue]
+  );
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Typewriter effect
+  const typeSpeed = 20; // in milliseconds
+  const typeOutText = (text: string) => {
+    if (typingInterval.current) {
+      clearInterval(typingInterval.current);
+    }
+
+    let currentIndex = 0;
+    setTypedLine("");
+
+    typingInterval.current = setInterval(() => {
+      if (currentIndex <= text.length) {
+        setTypedLine(text.slice(0, currentIndex));
+        currentIndex += 1;
+      } else {
+        if (typingInterval.current) {
+          clearInterval(typingInterval.current);
+        }
+      }
+    }, typeSpeed);
+  };
 
   // Content
   return (

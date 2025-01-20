@@ -9,12 +9,11 @@ import Player from "./Player";
 import GameUI from "./GameUI";
 import Bedroom from "./rooms/Bedroom";
 import Kitchen from "./rooms/Kitchen";
-
 import { useRoom } from "./RoomProvider";
 
 extend({ Text });
 
-const LoadingText = () => <pixiText text={"Loading..."} />;
+const LoadingText = () => <pixiText />;
 
 export default function PixiApp() {
   const appRef = useRef<ApplicationRef | null>(null);
@@ -85,10 +84,10 @@ export default function PixiApp() {
       const appBounds = app.screen;
       const outDir = isOutOfBounds(playerBounds, appBounds);
       const layout = rooms[currentRoom as RoomKey].layout;
-      console.log("current room move", currentRoom);
-      console.log("out of bounds", outDir);
-      console.log("layout", layout);
-      console.log("outDir in layout", outDir && outDir in layout);
+      // console.log("current room move", currentRoom);
+      // console.log("out of bounds", outDir);
+      // console.log("layout", layout);
+      // console.log("outDir in layout", outDir && outDir in layout);
       if (outDir && layout && outDir in layout) {
         const newRoom = layout[outDir];
         if (newRoom && newRoom in rooms) {
@@ -101,9 +100,10 @@ export default function PixiApp() {
   };
 
   useEffect(() => {
-    window.addEventListener("playerMove" as any, (e: MessageEvent) => {
+    const onPlayerMove = (e: MessageEvent) => {
       handlePlayerMove(e.data.playerBounds);
-    });
+    };
+    window.addEventListener("playerMove", onPlayerMove as EventListener);
   }, []);
 
   const repositionPlayerInNewRoom = (
@@ -111,7 +111,7 @@ export default function PixiApp() {
     playerBounds: CollisionInfo,
     appBounds: Rectangle
   ) => {
-    let newPosition = { x: playerBounds.x, y: playerBounds.y };
+    const newPosition = { x: playerBounds.x, y: playerBounds.y };
     const offset = 200;
     if (outDir === "left") newPosition.x = appBounds.width - offset;
     else if (outDir === "right") newPosition.x = offset;

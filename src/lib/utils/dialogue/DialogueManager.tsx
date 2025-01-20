@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { Story } from "inkjs";
 
 export default class DialogueManager {
   story: Story;
 
-  constructor(inkJSON: any) {
+  constructor(inkJSON: Record<string, any>) {
     this.story = new Story(inkJSON);
   }
 

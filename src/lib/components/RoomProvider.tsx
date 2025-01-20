@@ -7,13 +7,9 @@ import {
   ReactNode,
   Dispatch,
   SetStateAction,
-  useEffect,
 } from "react";
 
-import { Rectangle } from "pixi.js";
-import { useApplication } from "@pixi/react";
-import { CollisionInfo, isOutOfBounds } from "../utils/interaction";
-import { RoomName, MasterRoomLayout } from "../utils/room";
+import { RoomName } from "../utils/room";
 
 interface RoomContextType {
   currentRoom: string;
@@ -24,10 +20,10 @@ const RoomContext = createContext<RoomContextType | undefined>(undefined);
 
 export const RoomProvider = ({ children }: { children: ReactNode }) => {
   const [currentRoom, setCurrentRoom] = useState<RoomName>("bedroom");
-  const [initialPlayerPosition, setInitialPlayerPosition] = useState({
-    x: 150,
-    y: 150,
-  });
+  // const [initialPlayerPosition, setInitialPlayerPosition] = useState({
+  //   x: 150,
+  //   y: 150,
+  // });
   // const { app } = useApplication();
   // type RoomKey = "bedroom" | "kitchen";
 
