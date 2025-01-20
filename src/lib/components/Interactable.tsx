@@ -1,0 +1,81 @@
+import { useEffect, useState, useRef } from "react";
+
+import { extend, PixiReactElementProps, useSuspenseAssets } from "@pixi/react";
+import { Sprite } from "pixi.js";
+import { isColliding } from "../utils/interaction";
+import { CollisionInfo } from "../utils/interaction";
+
+extend({ Sprite });
+
+export interface InteractableProps
+  extends PixiReactElementProps<typeof Sprite> {
+  key: string;
+  textureSrc?: string;
+  dialogue?: string;
+  onTouch?: () => void;
+  onInteract?: () => void;
+}
+
+const defaultOnTouch = () => {
+  console.log("Player touched object!");
+};
+
+const defaultOnInteract = () => {
+  console.log("Player interacted with object!");
+};
+
+export default function Interactable({
+  textureSrc = "https://images.vexels.com/media/users/3/324278/isolated/preview/36957dab47f399e7db3b7c7129de6d20-book-icon-in-pink-color.png",
+  x = 0,
+  y = 0,
+  width = 100,
+  height = 100,
+  onTouch = defaultOnTouch,
+  onInteract = defaultOnInteract,
+  ...spriteProps
+}: InteractableProps) {
+  const objectRef = useRef<Sprite>(null);
+  const myCollisionInfo = { x, y, width, height };
+  const [texture] = useSuspenseAssets([textureSrc]);
+  const [touchingPlayer, setTouchingPlayer] = useState(false);
+
+  const handleCollision = (playerBounds: CollisionInfo) => {
+    if (playerBounds && isColliding(playerBounds, myCollisionInfo)) {
+      onTouch?.();
+      setTouchingPlayer(true);
+    } else {
+      setTouchingPlayer(false);
+    }
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "z" && touchingPlayer) onInteract?.();
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  useEffect(() => {
+    window.addEventListener("playerMove" as any, (e: MessageEvent) => {
+      handleCollision(e.data.playerBounds);
+    });
+  }, []);
+
+  return (
+    <pixiSprite
+      ref={objectRef}
+      eventMode="dynamic"
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      interactive={true}
+      texture={texture}
+      {...spriteProps}
+    />
+  );
+}
