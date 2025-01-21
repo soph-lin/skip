@@ -13,8 +13,6 @@ import { GameView } from "./Game";
 import { RoomName } from "../../utils/room";
 
 interface GameContextType {
-  gameView: GameView;
-  setGameView: Dispatch<SetStateAction<GameView>>;
   completedTutorial: boolean;
   setCompletedTutorial: Dispatch<SetStateAction<boolean>>;
   currentRoom: string;
@@ -34,8 +32,6 @@ export const GameProvider = ({ children }: { children: ReactNode }) => {
   return (
     <GameContext.Provider
       value={{
-        gameView,
-        setGameView,
         completedTutorial,
         setCompletedTutorial,
         currentRoom,
