@@ -10,7 +10,7 @@ import { useGame } from "../game/GameProvider";
 const reservedKeywords = ["SET", "IF", "ELSE IF"];
 
 function startsWithReservedKeyword(line) {
-  for (let keyword of reservedKeywords) {
+  for (const keyword of reservedKeywords) {
     if (line.trim().startsWith(keyword)) return true;
   }
   return false;
@@ -24,9 +24,8 @@ export default function DialogueSystem() {
   const currentLine = useRef<string | null>(null);
   const [typedLine, setTypedLine] = useState<string>("");
   const [choices, setChoices] = useState<{ index: number; text: string }[]>([]);
-  const [events, setEvents] = useState<string[]>([]);
   const typingInterval = useRef<NodeJS.Timeout | null>(null);
-  const { setCompletedTutorial, currentEnergy, setCurrentEnergy } = useGame();
+  const { setCompletedTutorial, setCurrentEnergy } = useGame();
   const completedTyping = typedLine === currentLine.current;
 
   // Initialize dialogue
@@ -69,7 +68,6 @@ export default function DialogueSystem() {
     const tags = dialogueManager.getTags();
     currentLine.current = line;
     setChoices(dialogueManager.getChoices());
-    setEvents(tags); // Capture custom tags
     processEvents(tags); // Process directly, since useEffect doesn't capture change if it's a line with reserved keyword
 
     if (line) {

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 
 import { extend, PixiReactElementProps, useSuspenseAssets } from "@pixi/react";
 import { Sprite } from "pixi.js";
