@@ -4,13 +4,14 @@ import { extend, PixiReactElementProps, useSuspenseAssets } from "@pixi/react";
 import { Sprite } from "pixi.js";
 import { isColliding } from "../../utils/interaction";
 import { CollisionInfo } from "../../utils/interaction";
+import { StaticImageData } from "next/image";
 
 extend({ Sprite });
 
 export interface InteractableProps
   extends PixiReactElementProps<typeof Sprite> {
   key: string;
-  textureSrc?: string;
+  textureSrc?: string | StaticImageData;
   dialogueName?: string;
   onTouch?: () => void;
   onInteract?: () => void;
@@ -31,7 +32,6 @@ export default function Interactable({
   const myCollisionInfo = { x, y, width, height };
   const [texture] = useSuspenseAssets([textureSrc]);
   const touchingPlayer = useRef(false);
-  // const [touchingPlayer, setTouchingPlayer] = useState(false);
 
   const handleOnTouch = () => {
     console.log("Player touched object!");

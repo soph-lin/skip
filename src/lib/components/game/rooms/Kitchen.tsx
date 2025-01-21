@@ -1,5 +1,5 @@
 import Room from "../Room";
-import { RoomInfo, RoomLayout } from "@/lib/utils/room";
+import { RoomInfo } from "@/lib/utils/room";
 import Interactable from "../Interactable";
 
 const KitchenComponent = () => (
@@ -13,8 +13,6 @@ const KitchenComponent = () => (
     ]}
   />
 );
-
-export const KitchenLayout: RoomLayout = { right: "bedroom" };
 
 const Kitchen: RoomInfo = {
   room: KitchenComponent,
