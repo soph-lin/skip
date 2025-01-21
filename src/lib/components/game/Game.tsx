@@ -15,7 +15,7 @@ export default function Game() {
   const Game = <PixiApp />;
 
   return (
-    <div className="w-[800px] h-[500px] flex item-center justify-center border border-foreground">
+    <div className="w-[800px] h-[500px] flex item-center justify-center border border-foreground overflow-hidden">
       <GameProvider>{runGame ? Game : Menu}</GameProvider>
     </div>
   );
