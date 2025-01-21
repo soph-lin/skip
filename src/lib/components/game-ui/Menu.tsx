@@ -1,5 +1,5 @@
+import { useCallback, useEffect, useState, useRef } from "react";
 import { cn } from "@/lib/utils/misc";
-import { useCallback, useEffect, useState } from "react";
 import RightArrow from "@/assets/svg/RightArrow";
 
 interface MenuProps {
@@ -9,38 +9,54 @@ interface MenuProps {
 }
 
 export default function Menu({ title, options, onSelect }: MenuProps) {
-  const [initialized, setInitialized] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [cooldown, setCooldown] = useState(false);
-  const length = options.length;
+  const selectedIndexRef = useRef(0);
+  const cooldownRef = useRef(false);
+  const [, forceRender] = useState({});
 
-  const isSelected = (index: number) => selectedIndex === index;
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      // Quit if cooling down
+      if (cooldownRef.current) return;
+
+      // Next index logic
+      let nextIndex = selectedIndexRef.current;
+      if (e.key === "ArrowUp" || e.key === "w") {
+        nextIndex =
+          (selectedIndexRef.current - 1 + options.length) % options.length;
+        selectedIndexRef.current = nextIndex;
+      } else if (e.key === "ArrowDown" || e.key === "s") {
+        nextIndex = (selectedIndexRef.current + 1) % options.length;
+        selectedIndexRef.current = nextIndex;
+      } else if (e.key === " ") {
+        onSelect?.(options[selectedIndexRef.current]);
+      }
+
+      forceRender({});
+
+      // Activate cooldown
+      if (
+        e.key === "ArrowUp" ||
+        e.key === "ArrowDown" ||
+        e.key === "w" ||
+        e.key === "s"
+      ) {
+        cooldownRef.current = true;
+        setTimeout(() => (cooldownRef.current = false), 300);
+      }
+    },
+    [onSelect, options, forceRender]
+  );
 
   useEffect(() => {
-    setInitialized(true);
-  }, []);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (cooldown) return;
-    if (e.key === "up" || e.key === "w") {
-      setSelectedIndex((prev) => (prev - 1 + length) % length);
-      setCooldown(true);
-    } else if (e.key === "down" || e.key === "s") {
-      setSelectedIndex((prev) => (prev + 1 + length) % length);
-      setCooldown(true);
-    } else if (e.key === " ") {
-      onSelect?.(options[selectedIndex]);
-    }
-  }, []);
-
-  useEffect(() => {
+    // Attach event listener to window
     window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      // Clean up event listener on unmount
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [handleKeyDown]);
 
-  useEffect(() => {
-    if (!initialized) return;
-    setTimeout(() => setCooldown(false), 300);
-  }, [selectedIndex]);
+  const isSelected = (index: number) => selectedIndexRef.current === index;
 
   return (
     <div className="w-full h-full flex flex-col gap-3 text-foreground text-3xl">

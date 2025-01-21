@@ -9,7 +9,6 @@ import {
   SetStateAction,
 } from "react";
 
-import { GameView } from "./Game";
 import { RoomName } from "../../utils/room";
 
 interface GameContextType {
@@ -24,7 +23,6 @@ interface GameContextType {
 const GameContext = createContext<GameContextType | undefined>(undefined);
 
 export const GameProvider = ({ children }: { children: ReactNode }) => {
-  const [gameView, setGameView] = useState<GameView>("Menu");
   const [completedTutorial, setCompletedTutorial] = useState(false);
   const [currentRoom, setCurrentRoom] = useState<RoomName>("bedroom");
   const [currentEnergy, setCurrentEnergy] = useState(50);
