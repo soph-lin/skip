@@ -8,24 +8,23 @@ import StartMenu from "@/lib/components/game-ui/StartMenu";
 import Settings from "@/lib/components/game-ui/Settings";
 import Controls from "@/lib/components/game-ui/Controls";
 
-type View = "Menu" | "Game" | "Settings" | "Controls";
+export type GameView = "Menu" | "Play" | "Settings" | "Controls";
 
 export default function Game() {
   const [view, setView] = useState("Menu");
 
-  const views: Record<View, React.ReactNode> = {
-    Menu: <StartMenu />,
-    Game: <PixiApp />,
+  const handleSetView = (view: GameView) => setView(view);
+
+  const views: Record<GameView, React.ReactNode> = {
+    Menu: <StartMenu setView={handleSetView} />,
+    Play: <PixiApp />,
     Settings: <Settings />,
     Controls: <Controls />,
   };
 
   return (
-    <div className="min-h-screen items-center justify-items-center gap-16 p-4">
-      <main className="row-start-2 flex flex-col items-center gap-8 sm:items-start">
-        <GameProvider>{views[view]}</GameProvider>
-      </main>
-      <footer className="row-start-3 flex flex-wrap items-center justify-center gap-6"></footer>
+    <div className="w-[800px] h-[500px] flex item-center justify-center border border-foreground">
+      <GameProvider>{views[view]}</GameProvider>
     </div>
   );
 }

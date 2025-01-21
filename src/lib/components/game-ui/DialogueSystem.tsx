@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { cn } from "../utils/misc";
+import { cn } from "../../utils/misc";
 
 import startDialogue from "@/lib/utils/dialogue/compiled/start.ink.json";
-import DialogueManager from "../utils/dialogue/DialogueManager";
-import { useGame } from "./GameProvider";
+import DialogueManager from "../../utils/dialogue/DialogueManager";
+import { useGame } from "../game/GameProvider";
 
 const reservedKeywords = ["SET", "IF", "ELSE IF"];
 
@@ -155,7 +155,7 @@ export default function DialogueSystem() {
   return (
     <div
       className={cn(
-        "w-full h-[100px] rounded-md border border-black bg-white flex flex-col gap-1 p-2 items-center text-lg select-none",
+        "w-full h-[100px] rounded-md border border-foreground shadow-lg bg-white flex flex-col gap-1 p-2 items-center text-lg select-none",
         currentLine.current ? "visible" : "invisible"
       )}
     >

@@ -4,21 +4,21 @@ import { Application, ApplicationRef, extend } from "@pixi/react";
 import { Rectangle, Text } from "pixi.js";
 import { useState, useEffect, useRef, useMemo, Suspense } from "react";
 
-import { CollisionInfo, isOutOfBounds } from "../utils/interaction";
+import { CollisionInfo, isOutOfBounds } from "../../utils/interaction";
 import Player from "./Player";
-import GameUI from "./GameUI";
+import GameUI from "../game-ui/GameUI";
 import Bedroom from "./rooms/Bedroom";
 import Kitchen from "./rooms/Kitchen";
-import { useRoom } from "./RoomProvider";
 
 extend({ Text });
 
 const LoadingText = () => <pixiText />;
+const preventChangeRoom = true;
 
 export default function PixiApp() {
   const appRef = useRef<ApplicationRef | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [canChangeRoom, setCanChangeRoom] = useState(true);
+  const canChangeRoom = useRef(true);
   const [initialPlayerPosition, setInitialPlayerPosition] = useState({
     x: 150,
     y: 150,
@@ -31,29 +31,24 @@ export default function PixiApp() {
 
   type RoomKey = keyof typeof rooms;
 
-  const { currentRoom, setCurrentRoom } = useRoom();
+  // const { currentRoom, setCurrentRoom } = useGame();
 
   // const [currentRoom, setCurrentRoom] = useState<string>(window.currentRoom || "bedroom");
   // // useState<RoomKey>("bedroom");
-  // const currentRoom = useRef<RoomKey>("bedroom");
+  const currentRoom = useRef<RoomKey>("bedroom");
 
   const CurrentRoomComponent = useMemo(
-    () => rooms[currentRoom as RoomKey].room,
+    () => rooms[currentRoom.current].room,
     [currentRoom]
   );
 
-  console.log("current room", currentRoom);
-  // const [renderTrigger, setRenderTrigger] = useState(0);
-  // const forceRender = () => {
-  //   setRenderTrigger((prev) => prev + 1);
-  // };
-
   useEffect(() => {
     if (!isLoaded) return;
-    console.log("updated room", currentRoom);
-    if (!canChangeRoom) {
+    if (!canChangeRoom.current) {
+      setIsLoaded(false);
       const timer = setTimeout(() => {
-        setCanChangeRoom(true);
+        setIsLoaded(true);
+        canChangeRoom.current = true;
       }, 2000);
 
       return () => clearTimeout(timer);
@@ -62,8 +57,8 @@ export default function PixiApp() {
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Enter") {
-      if (currentRoom === "bedroom") setCurrentRoom("kitchen");
-      else setCurrentRoom("bedroom");
+      if (currentRoom.current === "bedroom") currentRoom.current = "kitchen";
+      else currentRoom.current = "bedroom";
     }
   };
 
@@ -75,25 +70,18 @@ export default function PixiApp() {
   }, [handleKeyDown]);
 
   const handlePlayerMove = (playerBounds: CollisionInfo) => {
-    if (!canChangeRoom) {
-      console.log("can't change room");
-      return;
-    }
+    if (!canChangeRoom || preventChangeRoom) return;
     const app = appRef.current?.getApplication();
     if (app) {
       const appBounds = app.screen;
       const outDir = isOutOfBounds(playerBounds, appBounds);
-      const layout = rooms[currentRoom as RoomKey].layout;
-      // console.log("current room move", currentRoom);
-      // console.log("out of bounds", outDir);
-      // console.log("layout", layout);
-      // console.log("outDir in layout", outDir && outDir in layout);
+      const layout = rooms[currentRoom.current].layout;
       if (outDir && layout && outDir in layout) {
         const newRoom = layout[outDir];
         if (newRoom && newRoom in rooms) {
           repositionPlayerInNewRoom(outDir, playerBounds, appBounds);
-          setCurrentRoom(newRoom as RoomKey);
-          setCanChangeRoom(false);
+          currentRoom.current = newRoom as RoomKey;
+          canChangeRoom.current = false;
         }
       }
     }

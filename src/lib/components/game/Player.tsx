@@ -4,7 +4,7 @@ import { AnimatedSprite, Container } from "pixi.js";
 import playerIdle1 from "@/assets/player-idle-1.png";
 import playerIdle2 from "@/assets/player-idle-2.png";
 import playerIdle3 from "@/assets/player-idle-3.png";
-import { CollisionInfo } from "../utils/interaction";
+import { CollisionInfo } from "../../utils/interaction";
 
 extend({ Container, AnimatedSprite });
 
