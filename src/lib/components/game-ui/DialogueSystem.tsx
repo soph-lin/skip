@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { cn } from "../../utils/misc";
 
 import startDialogue from "@/lib/utils/dialogue/compiled/start.ink.json";
+import bookDialogue from "@/lib/utils/dialogue/compiled/book.ink.json";
+import guitarDialogue from "@/lib/utils/dialogue/compiled/guitar.ink.json";
 import DialogueManager from "../../utils/dialogue/DialogueManager";
 import { useGame } from "../game/GameProvider";
 
@@ -15,6 +17,12 @@ function startsWithReservedKeyword(line) {
   }
   return false;
 }
+
+const dialogues = {
+  start: startDialogue,
+  book: bookDialogue,
+  guitar: guitarDialogue,
+};
 
 export default function DialogueSystem() {
   const initialized = useRef(false);
@@ -43,6 +51,13 @@ export default function DialogueSystem() {
 
       // Load new dialogue
       const name = e.data.name;
+      if (name in dialogues) {
+        const manager = new DialogueManager(dialogues[name]);
+        setDialogueManager(manager);
+        return;
+      }
+
+      // Load new dialogue dynamically. Currently only works locally.
       const modulePath = `@/lib/utils/dialogue/compiled/${name}.ink.json`;
       try {
         const dialogueData = await import(modulePath);
