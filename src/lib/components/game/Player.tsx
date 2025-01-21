@@ -86,7 +86,7 @@ export default function Player({ initialPosition }: PlayerProps) {
 
   // Content
   return (
-    <pixiContainer>
+    <pixiContainer zIndex={1}>
       <pixiAnimatedSprite
         ref={playerRef}
         eventMode="dynamic"
