@@ -23,7 +23,7 @@ export default function Settings({ isOpen, onClose }: SettingsProps) {
         <div className="mb-6">
           <label
             htmlFor="sfx-slider"
-            className="block text-lg font-medium text-gray-700 mb-2"
+            className="block text-lg font-medium text-foreground mb-2"
           >
             SFX Volume: {sfxVolume}%
           </label>
