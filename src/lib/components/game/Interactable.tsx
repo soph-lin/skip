@@ -61,7 +61,7 @@ export default function Interactable({
   };
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === "z" && touchingPlayer) handleOnInteract();
+    if (e.key === "z" && touchingPlayer.current) handleOnInteract();
   }, []);
 
   useEffect(() => {

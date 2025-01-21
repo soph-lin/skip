@@ -71,7 +71,6 @@ export default function Player({ initialPosition }: PlayerProps) {
 
   // External position update
   useEffect(() => {
-    console.log("updated player position", initialPosition);
     setPosition(initialPosition);
   }, [initialPosition]);
 
