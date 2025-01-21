@@ -5,17 +5,29 @@ import { cn } from "../utils/misc";
 
 import startDialogue from "@/lib/utils/dialogue/compiled/start.ink.json";
 import DialogueManager from "../utils/dialogue/DialogueManager";
+import { useGame } from "./GameProvider";
+
+const reservedKeywords = ["SET", "IF", "ELSE IF"];
+
+function startsWithReservedKeyword(line) {
+  for (let keyword of reservedKeywords) {
+    if (line.trim().startsWith(keyword)) return true;
+  }
+  return false;
+}
 
 export default function DialogueSystem() {
   const initialized = useRef(false);
   const [dialogueManager, setDialogueManager] = useState(
     () => new DialogueManager(startDialogue)
   );
-  const [currentLine, setCurrentLine] = useState<string | null>(null);
+  const currentLine = useRef<string | null>(null);
   const [typedLine, setTypedLine] = useState<string>("");
   const [choices, setChoices] = useState<{ index: number; text: string }[]>([]);
   const [events, setEvents] = useState<string[]>([]);
   const typingInterval = useRef<NodeJS.Timeout | null>(null);
+  const { setCompletedTutorial, currentEnergy, setCurrentEnergy } = useGame();
+  const completedTyping = typedLine === currentLine.current;
 
   // Initialize dialogue
   useEffect(() => {
@@ -27,6 +39,10 @@ export default function DialogueSystem() {
   // Update dialogue
   useEffect(() => {
     const handleUpdateDialogue = async (e: MessageEvent<{ name: string }>) => {
+      // Dialogue in-progress, don't update to new dialogue
+      if (currentLine.current) return;
+
+      // Load new dialogue
       const name = e.data.name;
       const modulePath = `@/lib/utils/dialogue/compiled/${name}.ink.json`;
       try {
@@ -51,12 +67,18 @@ export default function DialogueSystem() {
   const advanceDialogue = () => {
     const line = dialogueManager.getNextLine();
     const tags = dialogueManager.getTags();
-    setCurrentLine(line);
+    currentLine.current = line;
     setChoices(dialogueManager.getChoices());
     setEvents(tags); // Capture custom tags
+    processEvents(tags); // Process directly, since useEffect doesn't capture change if it's a line with reserved keyword
 
-    if (line) typeOutText(line);
-    else setTypedLine("");
+    if (line) {
+      if (startsWithReservedKeyword(line)) {
+        advanceDialogue();
+      } else typeOutText(line);
+    } else {
+      setTypedLine("");
+    }
   };
 
   const handleChoiceClick = (index: number) => {
@@ -64,18 +86,16 @@ export default function DialogueSystem() {
     advanceDialogue();
   };
 
-  useEffect(() => {
-    // Process custom events
+  const processEvents = (events: string[]) => {
     events.forEach((event) => {
-      if (event.startsWith("event ")) {
-        const eventName = event.split(" ")[1];
-        console.log(`Triggered event: ${eventName}`);
-      } else if (event.startsWith("trigger ")) {
-        const triggerName = event.split(" ")[1];
-        console.log(`Triggered custom function: ${triggerName}`);
+      if (event === "completedTutorial") {
+        setCompletedTutorial(true);
+      } else if (event.startsWith("lowerEnergy-")) {
+        const amount = parseInt(event.split("-")[1], 10);
+        if (!isNaN(amount)) setCurrentEnergy((prev) => prev - amount);
       }
     });
-  }, [events]);
+  };
 
   useEffect(() => {
     return () => {
@@ -90,7 +110,13 @@ export default function DialogueSystem() {
     (event: KeyboardEvent) => {
       if (event.key === " ") {
         event.preventDefault();
-        advanceDialogue();
+        if (currentLine.current && !completedTyping) {
+          clearInterval(typingInterval.current);
+          typingInterval.current = null;
+          setTypedLine(currentLine.current);
+        } else {
+          advanceDialogue();
+        }
       }
     },
     [advanceDialogue]
@@ -130,11 +156,11 @@ export default function DialogueSystem() {
     <div
       className={cn(
         "w-full h-[100px] rounded-md border border-black bg-white flex flex-col gap-1 p-2 items-center text-lg select-none",
-        currentLine ? "visible" : "invisible"
+        currentLine.current ? "visible" : "invisible"
       )}
     >
       <p>{typedLine}</p>
-      {typedLine === currentLine && (
+      {completedTyping && (
         <div className="flex flex-row gap-4 items-center">
           {choices.map((choice) => (
             <button
